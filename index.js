@@ -13,6 +13,16 @@ function codeImport(options = {}) {
     });
 
     for (const [node] of codes) {
+
+      // If someone tries to import a file, but forgets to add a language tag e.g ```json
+      // then the meta string will be interpreted as the language. So check the lang prop for file=
+      // and show a helpful error if this is the case, or else importing wont work for them.
+      if (node.lang && node.lang.startsWith('file=')) {
+        throw new Error(`Language tag missing on code block snippet in ${file.history}`)
+      }
+      if (!node.meta) {
+        continue;
+      }
       const args = parseArgs(node.meta);
       if (!args.file) {
         continue;

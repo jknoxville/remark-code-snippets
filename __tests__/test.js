@@ -56,6 +56,80 @@ test('Basic file import between markers', () => {
   `);
 });
 
+test('Test without additional args', () => {
+  expect(
+    remark()
+      .use(codeImport, {})
+      .processSync({
+        contents: `
+\`\`\`js
+Something
+\`\`\`
+`,
+        path: path.resolve('test.md'),
+      })
+      .toString()
+  ).toMatchInlineSnapshot(`
+    "\`\`\`js
+    Something
+    \`\`\`
+    "
+  `);
+});
+
+test('Test without additional args or language tag', () => {
+  expect(
+    remark()
+      .use(codeImport, {})
+      .processSync({
+        contents: `
+\`\`\`
+Something
+\`\`\`
+`,
+        path: path.resolve('test.md'),
+      })
+      .toString()
+  ).toMatchInlineSnapshot(`
+    "    Something
+    "
+  `);
+});
+
+test('Test without langauge tag', () => {
+  expect(() =>
+    remark()
+      .use(codeImport, {})
+      .processSync({
+        contents: `
+\`\`\` file=./__fixtures__/say-hi.js start=start_here end=end_here
+\`\`\`
+`,
+        path: path.resolve('test.md'),
+      })
+      .toString()
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Language tag missing on code block snippet in /Users/jknox/github/remark-code-snippets/test.md"`
+  );
+});
+
+test('Test without langauge tag and without space', () => {
+  expect(() =>
+    remark()
+      .use(codeImport, {})
+      .processSync({
+        contents: `
+\`\`\`file=./__fixtures__/say-hi.js start=start_here end=end_here
+\`\`\`
+`,
+        path: path.resolve('test.md'),
+      })
+      .toString()
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Language tag missing on code block snippet in /Users/jknox/github/remark-code-snippets/test.md"`
+  );
+});
+
 test('Just a start marker', () => {
   expect(
     remark()
@@ -122,7 +196,9 @@ test('Start marker not found', () => {
         path: path.resolve('test.md'),
       })
       .toString()
-  ).toThrow();
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Code block start marker \\"dont_start_here\\" not found in file ./__fixtures__/say-hi.js"`
+  );
 });
 
 test('End marker not found', () => {
@@ -137,7 +213,9 @@ test('End marker not found', () => {
         path: path.resolve('test.md'),
       })
       .toString()
-  ).toThrow();
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Code block end marker \\"dont_end_here\\" not found in file ./__fixtures__/say-hi.js"`
+  );
 });
 
 test('Ambiguous start marker', () => {
@@ -152,7 +230,9 @@ test('Ambiguous start marker', () => {
         path: path.resolve('test.md'),
       })
       .toString()
-  ).toThrow();
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Ambiguous code block start marker. Found more than once in ./__fixtures__/say-hi.js, at lines 4,8"`
+  );
 });
 
 test('Ambiguous end marker', () => {
@@ -167,5 +247,7 @@ test('Ambiguous end marker', () => {
         path: path.resolve('test.md'),
       })
       .toString()
-  ).toThrow();
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Ambiguous code block end marker. Found more than once in ./__fixtures__/say-hi.js, at lines 4,8"`
+  );
 });
