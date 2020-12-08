@@ -50,7 +50,7 @@ console.log('This will also not be included');
 
 ````md
 ```js file=./say-hi.js start=start_here end=end_here
-console.log('This willl be included');
+console.log('This will be included');
 ```
 ````
 
