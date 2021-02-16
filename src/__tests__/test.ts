@@ -34,6 +34,38 @@ test('Basic file import', () => {
   `);
 });
 
+test('Basic file import with baseDir', () => {
+  expect(
+    remark()
+      .use(codeImport, {baseDir: '__fixtures__'})
+      .processSync({
+        contents: `
+\`\`\`js file=./say-hi.js
+\`\`\`
+`,
+        path: path.resolve('test.md'),
+      })
+      .toString()
+  ).toMatchInlineSnapshot(`
+    "\`\`\`js file=./say-hi.js
+    function doSomething() {
+        return 1;
+    }
+
+    // start_here
+
+    console.log('Hello remark-code-snippets!');
+
+    // end_here
+
+    function doSomethingElse() {
+        return 2;
+    }
+    \`\`\`
+    "
+  `);
+});
+
 test('Basic file import between markers', () => {
   expect(
     remark()

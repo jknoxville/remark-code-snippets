@@ -6,7 +6,8 @@ import {Transformer} from 'unified';
 const {parseArgs} = require('./arguments');
 
 type Options = {
-  async?: Boolean
+  async?: Boolean,
+  baseDir?: string,
 };
 
 function codeImport(options: Options = {}): Transformer {
@@ -33,7 +34,7 @@ function codeImport(options: Options = {}): Transformer {
       if (!args.file) {
         continue;
       }
-      const fileAbsPath = path.resolve(file.dirname || '', args.file);
+      const fileAbsPath = path.resolve(options.baseDir ?? (file.dirname || ''), args.file);
 
       if (options.async) {
         promises.push(
