@@ -1,4 +1,4 @@
-const codeImport = require('../');
+const codeImport = require('..');
 const remark = require('remark');
 const path = require('path');
 

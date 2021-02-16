@@ -1,17 +1,17 @@
 {
   "name": "remark-code-snippets",
   "description": "Import snippets of source code from files as code blocks",
-  "version": "0.1.1",
-  "main": "index.js",
+  "version": "0.1.3",
   "author": "John Knox",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jknoxville/remark-code-snippets.git"
   },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "index.js",
-    "arguments.js"
+    "/dist"
   ],
   "keywords": [
     "remark",
@@ -25,6 +25,9 @@
     "code-snippets"
   ],
   "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepare": "yarn clean && yarn test && yarn build",
     "test": "jest"
   },
   "dependencies": {
@@ -33,7 +36,9 @@
   "devDependencies": {
     "jest": "^26.6.3",
     "prettier": "1.19.1",
-    "remark": "^13.0.0"
+    "remark": "^13.0.0",
+    "ts-jest": "^26.5.1",
+    "typescript": "^4.1.5"
   },
   "prettier": {
     "singleQuote": true,

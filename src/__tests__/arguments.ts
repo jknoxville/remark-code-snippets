@@ -1,4 +1,4 @@
-const {parseArgs} = require('../arguments.js');
+const {parseArgs} = require('../arguments');
 
 test("Just file name", () => {
     expect(parseArgs("file=some/path ")).toEqual(

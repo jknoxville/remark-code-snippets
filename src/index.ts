@@ -1,11 +1,17 @@
-const fs = require('fs');
-const path = require('path');
-const visit = require('unist-util-visit');
-const {parseArgs} = require('./arguments.js');
+import fs from 'fs';
+import path from 'path';
+import visit from 'unist-util-visit';
+import {Node, Parent} from 'unist';
+import {Transformer} from 'unified';
+const {parseArgs} = require('./arguments');
 
-function codeImport(options = {}) {
-  return function transformer(tree, file) {
-    const codes = [];
+type Options = {
+  async?: Boolean
+};
+
+function codeImport(options: Options = {}): Transformer {
+  return function transformer(tree, file): Promise<void> | void {
+    const codes: [Node, number, Parent | undefined][] = [];
     const promises = [];
 
     visit(tree, 'code', (node, index, parent) => {
@@ -17,7 +23,7 @@ function codeImport(options = {}) {
       // If someone tries to import a file, but forgets to add a language tag e.g ```json
       // then the meta string will be interpreted as the language. So check the lang prop for file=
       // and show a helpful error if this is the case, or else importing wont work for them.
-      if (node.lang && node.lang.startsWith('file=')) {
+      if (hasLang(node) && node.lang.startsWith('file=')) {
         throw new Error(`Language tag missing on code block snippet in ${file.history}`)
       }
       if (!node.meta) {
@@ -27,11 +33,11 @@ function codeImport(options = {}) {
       if (!args.file) {
         continue;
       }
-      const fileAbsPath = path.resolve(file.dirname, args.file);
+      const fileAbsPath = path.resolve(file.dirname || '', args.file);
 
       if (options.async) {
         promises.push(
-          new Promise((resolve, reject) => {
+          new Promise<void>((resolve, reject) => {
             fs.readFile(fileAbsPath, 'utf8', (err, fileContent) => {
               if (err) {
                 reject(err);
@@ -51,12 +57,12 @@ function codeImport(options = {}) {
     }
 
     if (promises.length) {
-      return Promise.all(promises);
+      return Promise.all(promises).then(() => {});
     }
   };
 }
 
-function getSnippet(fileContent, args) {
+function getSnippet(fileContent: string, args: { start: any; file: any; end: any; }) {
   let lines = fileContent.trim().split('\n');
 
   let startingLine = 0;
@@ -89,8 +95,8 @@ function getSnippet(fileContent, args) {
   return lines.join('\n');
 }
 
-function getLineNumbersOfOccurrence(lines, searchTerm) {
-  let lineNumbers = [];
+function getLineNumbersOfOccurrence(lines: string[], searchTerm: string) {
+  let lineNumbers: number[] = [];
   lines.forEach((line, index) => {
     const startIndex = line.indexOf(searchTerm);
     if (startIndex > -1) {
@@ -98,6 +104,10 @@ function getLineNumbersOfOccurrence(lines, searchTerm) {
     }
   });
   return lineNumbers;
+}
+
+function hasLang(node: Node): node is Node & {lang: string} {
+  return Boolean(node.lang) && typeof node.lang === 'string';
 }
 
 module.exports = codeImport;
