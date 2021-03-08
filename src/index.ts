@@ -93,7 +93,22 @@ function getSnippet(fileContent: string, args: { start: any; file: any; end: any
 
   lines = lines.slice(startingLine, endingLine);
 
-  return lines.join('\n');
+  return removeCommonIndentation(lines).join('\n');
+}
+
+function removeCommonIndentation(lines: string[]): string[] {
+  const commonIndentation = lines.reduce((minIndentation, line) => {
+    if (line === '') {
+      return minIndentation;
+    }
+    const m = line.match(/^( *)/);
+    if (!m) {
+      return 0;
+    }
+    return Math.min(m[1].length, minIndentation);
+  }, Number.MAX_VALUE);
+
+  return lines.map(line => line.slice(commonIndentation));
 }
 
 function getLineNumbersOfOccurrence(lines: string[], searchTerm: string) {

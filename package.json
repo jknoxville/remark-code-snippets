@@ -1,7 +1,7 @@
 {
   "name": "remark-code-snippets",
   "description": "Import snippets of source code from files as code blocks",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "John Knox",
   "license": "MIT",
   "repository": {

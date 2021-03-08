@@ -27,7 +27,16 @@ test('Basic file import', () => {
     // end_here
 
     function doSomethingElse() {
-        return 2;
+        // start_indented_example_1
+        bar x = 4;
+
+        return x;
+        // end_indented_example_1
+    }
+
+    function doEvenMore() {
+        return \\"something\\";
+        // end_indented_example_2
     }
     \`\`\`
     "
@@ -37,7 +46,7 @@ test('Basic file import', () => {
 test('Basic file import with baseDir', () => {
   expect(
     remark()
-      .use(codeImport, {baseDir: '__fixtures__'})
+      .use(codeImport, { baseDir: '__fixtures__' })
       .processSync({
         contents: `
 \`\`\`js file=./say-hi.js
@@ -59,7 +68,16 @@ test('Basic file import with baseDir', () => {
     // end_here
 
     function doSomethingElse() {
-        return 2;
+        // start_indented_example_1
+        bar x = 4;
+
+        return x;
+        // end_indented_example_1
+    }
+
+    function doEvenMore() {
+        return \\"something\\";
+        // end_indented_example_2
     }
     \`\`\`
     "
@@ -83,6 +101,55 @@ test('Basic file import between markers', () => {
 
     console.log('Hello remark-code-snippets!');
 
+    \`\`\`
+    "
+  `);
+});
+
+test('Import between indented markers with common indentation - Should remove indentation', () => {
+  expect(
+    remark()
+      .use(codeImport, {})
+      .processSync({
+        contents: `
+\`\`\`js file=./__fixtures__/say-hi.js start=start_indented_example_1 end=end_indented_example_1
+\`\`\`
+`,
+        path: path.resolve('test.md'),
+      })
+      .toString()
+  ).toMatchInlineSnapshot(`
+    "\`\`\`js file=./__fixtures__/say-hi.js start=start_indented_example_1 end=end_indented_example_1
+    bar x = 4;
+
+    return x;
+    \`\`\`
+    "
+  `);
+});
+
+test('Import between indented markers without common indentation - Should not remove indentation', () => {
+  expect(
+    remark()
+      .use(codeImport, {})
+      .processSync({
+        contents: `
+\`\`\`js file=./__fixtures__/say-hi.js start=start_indented_example_1 end=end_indented_example_2
+\`\`\`
+`,
+        path: path.resolve('test.md'),
+      })
+      .toString()
+  ).toMatchInlineSnapshot(`
+    "\`\`\`js file=./__fixtures__/say-hi.js start=start_indented_example_1 end=end_indented_example_2
+        bar x = 4;
+
+        return x;
+        // end_indented_example_1
+    }
+
+    function doEvenMore() {
+        return \\"something\\";
     \`\`\`
     "
   `);
@@ -182,7 +249,16 @@ test('Just a start marker', () => {
     // end_here
 
     function doSomethingElse() {
-        return 2;
+        // start_indented_example_1
+        bar x = 4;
+
+        return x;
+        // end_indented_example_1
+    }
+
+    function doEvenMore() {
+        return \\"something\\";
+        // end_indented_example_2
     }
     \`\`\`
     "
