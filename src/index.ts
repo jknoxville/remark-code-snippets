@@ -8,6 +8,7 @@ const {parseArgs} = require('./arguments');
 type Options = {
   async?: Boolean,
   baseDir?: string,
+  silent?: Boolean,
 };
 
 function codeImport(options: Options = {}): Transformer {
@@ -35,6 +36,9 @@ function codeImport(options: Options = {}): Transformer {
         continue;
       }
       const fileAbsPath = path.resolve(options.baseDir ?? (file.dirname || ''), args.file);
+      if (!options.silent) {
+        logReferencedFile(fileAbsPath);
+      }
 
       if (options.async) {
         promises.push(
@@ -126,4 +130,11 @@ function hasLang(node: Node): node is Node & {lang: string} {
   return Boolean(node.lang) && typeof node.lang === 'string';
 }
 
+function logReferencedFile(filepath: string): void {
+  const relativePath = path.relative(process.cwd(), filepath);
+  // Output the names of the imported files.
+  // This lets a listening process see which files need to be watched for changes.
+  const message = {event: 'imported-file', file: relativePath};
+  console.log(`[remark-code-snippets] ${JSON.stringify(message)}`);
+}
 module.exports = codeImport;
