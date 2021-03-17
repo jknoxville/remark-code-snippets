@@ -1,16 +1,8 @@
-const mockedLog = jest.fn();
-global.console = {
-  ...global.console,
-  log: mockedLog,
-};
 
-const codeImport = require('..');
+import codeImport from '..';
+import {getReferencedFiles} from '..';
 const remark = require('remark');
 const path = require('path');
-
-beforeEach(() => {
-  mockedLog.mockClear();
-})
 
 test('Basic file import', () => {
   expect(
@@ -370,35 +362,17 @@ test('Ambiguous end marker', () => {
   );
 });
 
-test('File import outputs the filename in expected structure', () => {
-  const logs: string[] = [];
-  mockedLog.mockImplementation(log => logs.push(log));
+test('File import outputs the filename in referenced files', () => {
   remark()
     .use(codeImport, {})
     .processSync({
       contents: `
-\`\`\`js file=./__fixtures__/say-hi.js start=start_here end=end_here
+\`\`\`js file=__fixtures__/say-hi.js start=start_here end=end_here
 \`\`\`
 `,
       path: path.resolve('test.md'),
     });
 
-    expect(global.console.log).toBeCalledTimes(1);
-    expect(logs).toEqual(['[remark-code-snippets] {"event":"imported-file","file":"__fixtures__/say-hi.js"}']);
-    const parsedLog = JSON.parse(logs[0].split(' ')[1]);
-    expect(parsedLog.file).toEqual("__fixtures__/say-hi.js");
-});
-
-test('File import doesnt log when silent is specified', () => {
-  remark()
-    .use(codeImport, {silent: true})
-    .processSync({
-      contents: `
-\`\`\`js file=./__fixtures__/say-hi.js start=start_here end=end_here
-\`\`\`
-`,
-      path: path.resolve('test.md'),
-    });
-
-    expect(mockedLog).toHaveBeenCalledTimes(0);
+    const files = getReferencedFiles();
+    expect(files).toEqual(['__fixtures__/say-hi.js']);
 });
