@@ -10,6 +10,7 @@ const referencedFiles = new Set<string>();
 type Options = {
   async?: Boolean,
   baseDir?: string,
+  ignoreMissingFiles?: boolean,
 };
 
 export default function codeImport(options: Options = {}): Transformer {
@@ -44,6 +45,11 @@ export default function codeImport(options: Options = {}): Transformer {
           new Promise<void>((resolve, reject) => {
             fs.readFile(fileAbsPath, 'utf8', (err, fileContent) => {
               if (err) {
+                if (options.ignoreMissingFiles) {
+                  node.value = `Referenced file from ${file.name} (${args.file}) not found.`;
+                  resolve();
+                  return;
+                }
                 reject(err);
                 return;
               }
@@ -54,8 +60,14 @@ export default function codeImport(options: Options = {}): Transformer {
           })
         );
       } else {
+        if (!fs.existsSync(fileAbsPath)) {
+          if (options.ignoreMissingFiles) {
+            node.value = `Referenced file from ${file.name} (${args.file}) not found.`;
+            continue;
+          }
+          throw new Error(`File not found: ${args.file}`);
+        }
         const fileContent = fs.readFileSync(fileAbsPath, 'utf8');
-
         node.value = getSnippet(fileContent, args);
       }
     }

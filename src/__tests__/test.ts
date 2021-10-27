@@ -1,6 +1,5 @@
-
 import codeImport from '..';
-import {getReferencedFiles} from '..';
+import { getReferencedFiles } from '..';
 const remark = require('remark');
 const path = require('path');
 
@@ -40,6 +39,42 @@ test('Basic file import', () => {
         return \\"something\\";
         // end_indented_example_2
     }
+    \`\`\`
+    "
+  `);
+});
+
+test('Basic file import when file not found', () => {
+  expect(() =>
+    remark()
+      .use(codeImport, {})
+      .processSync({
+        contents: `
+\`\`\`js file=./__fixtures__/404.js
+\`\`\`
+`,
+        path: path.resolve('test.md'),
+      })
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"File not found: ./__fixtures__/404.js"`
+  );
+});
+
+test('Basic file import when file not found and ignoreMissingFiles enabled', () => {
+  expect(
+    remark()
+      .use(codeImport, { ignoreMissingFiles: true })
+      .processSync({
+        contents: `
+\`\`\`js file=./__fixtures__/404.js
+\`\`\`
+`,
+        path: path.resolve('test.md'),
+      })
+      .toString()
+  ).toMatchInlineSnapshot(`
+    "\`\`\`js file=./__fixtures__/404.js
+    Referenced file from undefined (./__fixtures__/404.js) not found.
     \`\`\`
     "
   `);
@@ -373,6 +408,6 @@ test('File import outputs the filename in referenced files', () => {
       path: path.resolve('test.md'),
     });
 
-    const files = getReferencedFiles();
-    expect(files).toEqual(['__fixtures__/say-hi.js']);
+  const files = getReferencedFiles();
+  expect(files).toEqual(['__fixtures__/say-hi.js', '__fixtures__/404.js']);
 });

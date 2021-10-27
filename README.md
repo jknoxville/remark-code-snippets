@@ -58,6 +58,7 @@ console.log('This will be included');
 
 - `baseDir`: By default, file paths will be interpreted relative to the file they are referenced from. Specify a path here to override that and then reference all files relative to a fixed point. Usually, it makes sense for the baseDir to point to some top-level `src` directory.
 - `async`: By default, this plugin uses `readFileSync` to read the contents of the files. Set this to `true` if you want to use `readFile` for non-blocking IO.
+- `ignoreMissingFiles`: By default, referencing a file that doesn't exist will throw an error. But in some cases, e.g. in development mode, you might want to be able to iterate quickly without failing here. Set this to true for this behaviour.
 
 ## Testing
 
